@@ -31,10 +31,26 @@ block content
         thead
           th UserName
           th Email
+          th Edit
           th Delete?
         tbody
     // /USER LIST
 
+    // EDIT USER
+    h2 Edit User
+    #editUser
+      fieldset
+        input#editUserName(type='text', placeholder='Username')
+        input#editUserEmail(type='text', placeholder='Email')
+        br
+        input#editUserFullname(type='text', placeholder='Full Name')
+        input#editUserAge(type='text', placeholder='age')
+        br
+        input#editUserLocation(type='text', placeholder='Location')
+        input#editUserGender(type='text', placeholder='Gender')
+        br
+        button#btnEditUser Update
+    // /EDIT USER
     // ADD USER
     h2 Add User
     #addUser

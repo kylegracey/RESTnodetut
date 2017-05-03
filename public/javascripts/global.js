@@ -9,7 +9,15 @@ $(document).ready(function() {
 
     // Username link click
     $('#userList table tbody').on('click', 'td a.linkshowuser', showUserInfo);
+
+    // Edit user button click
+    $('#userList table tbody').on('click', 'td a.linkedituser', showEditUserInfo);
+
+    // Add user button click
     $('#btnAddUser').on('click', addUser);
+
+    // Delete User link click
+    $('#userList table tbody').on('click', 'td a.linkdeleteuser', deleteUser);
 
 });
 
@@ -30,6 +38,7 @@ function populateTable() {
           tableContent += '<tr>';
           tableContent += '<td><a href="#" class="linkshowuser" rel="' + this.username + '">' + this.username + '</a></td>';
           tableContent += '<td>' + this.email + '</td>';
+          tableContent += '<td><a href="#" class="linkedituser" rel="' + this._id + '">edit</a></td>';
           tableContent += '<td><a href="#" class="linkdeleteuser" rel="' + this._id + '">delete</a></td>';
           tableContent += '</tr>';
         });
@@ -61,6 +70,63 @@ function showUserInfo(event){
   $('#userInfoLocation').text(thisUserObject.location);
 
 };
+
+// Show Edit User info
+function showEditUserInfo(event) {
+
+  // Prevent link from firing
+  event.preventDefault();
+
+  var thisUserId = $(this).attr('rel');
+
+  var arrayPosition = userListData.map(function(arrayItem) { return arrayItem["_id"]; }).indexOf(thisUserId);
+  // Get our user object
+  var thisUserObject = userListData[arrayPosition];
+
+  // Populate Edit Form
+  $('#editUserName').val(thisUserObject.username);
+  $('#editUserEmail').val(thisUserObject.email);
+  $('#editUserFullname').val(thisUserObject.fullname);
+  $('#editUserAge').val(thisUserObject.age);
+  $('#editUserLocation').val(thisUserObject.location);
+  $('#editUserGender').val(thisUserObject.gender);
+
+  function editSubmitUser(){
+
+    var updatedUser = {
+      'username': $('#editUserName').val(),
+      'email': $('#editUserEmail').val(),
+      'fullname': $('#editUserFullname').val(),
+      'age': $('#editUserAge').val(),
+      'location': $('#editUserLocation').val(),
+      'gender': $('#editUserGender').val()
+    }
+
+    $.ajax({
+      type: 'PUT',
+      url: '/users/edituser/' + thisUserId,
+      data: updatedUser
+    }).done(function(response){
+      // Check for successful (blank) response
+      if (response.msg === '') {
+
+        // Clear the form inputs
+        $('#addUser fieldset input').val('');
+
+        // Update the table
+        populateTable();
+
+      }
+      else {
+        // If something goes wrong, alert the error message that our service returned
+        alert('Error: ' + response.msg);
+      }
+    });
+  }
+
+  $('#btnEditUser').on('click', editSubmitUser);
+
+}
 
 // Add User
 function addUser(event) {
@@ -115,6 +181,45 @@ function addUser(event) {
 
     // If errorCount is more than 0, error out
     alert('Please fill in all fields');
+    return false;
+
+  }
+
+};
+
+function deleteUser(event) {
+
+  event.preventDefault();
+
+  // Pop up a confirmation dialog
+  var confirmation = confirm('Are you sure you want to delete this user?');
+
+  // Check to make sure the user confirmed
+  if (confirmation === true) {
+
+    //If they did, do our delete
+    $.ajax({
+      type: 'DELETE',
+      url: '/users/deleteuser/' + $(this).attr('rel')
+    }).done(function( response ){
+
+      // Check for a successful (blank) response
+      if (response.msg === '') {
+
+      }
+      else {
+        alert('Error: ' + response.msg);
+      }
+
+      // Update the table
+      populateTable();
+
+    });
+
+  }
+  else {
+
+    // If they said no to the confirm, do nothing
     return false;
 
   }
